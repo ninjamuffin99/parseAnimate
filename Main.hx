@@ -3,9 +3,11 @@ import sys.io.File;
 
 class Main
 {
+    static var symbolAtlasShit:Map<String, String> = new Map();
+
     static public function main():Void
         {
-            var animateFile:String = File.getContent('./animTest/Animation2.json');
+            var animateFile:String = File.getContent('./animTest/Animation4.json');
             var theJSON = Json.parse(animateFile);
 
 
@@ -15,7 +17,6 @@ class Main
                 when it's parsed as HaxeFlixel animations, where it will
                 be the 4 digit "0000" or so, instead of "0" when converted
                 to an Int*/
-            var symbolAtlasShit:Map<String, String> = new Map();
 
             // for (i in coolParsed.AN.TL.L[0].FR)
                 // trace(i.E);
@@ -27,29 +28,13 @@ class Main
                 symbolAtlasShit = parseSymbolDictionary(coolParsed);
 
 
-            for (layer in coolParsed.AN.TL.L)
-            {
-                for (frame in layer.FR)
-                {
-                    for (element in frame.E)
-                    {
-                        if (Reflect.hasField(element, "SI"))
-                        {
-                            trace('Cool symbol instance!');
-                            trace(element.SI.SN);
-                        }
-                        else
-                        {
-                            trace('ATLAS SYMBOL INSTANCE!');
-                            trace(element.ASI.N);
-                        }
-                    }
-                }
-            }
+            loopTimeline(coolParsed.AN.TL, coolParsed);
+
+            
+            trace(loopShit);
 
 
-
-            trace(symbolAtlasShit.toString());
+            // trace(symbolAtlasShit.toString());
             trace(hasSymbolDictionary);
 
             // for (i in coolParsed)
@@ -58,32 +43,93 @@ class Main
             // trace(coolParsed.AN.STI);
         }
 
-    static function parseSymbolDictionary(coolParsed:Parsed):Map<String, String>
-        {   
+    static var loopShit:Int = 0;
 
-            var awesomeMap:Map<String, String> = new Map();
-            for (symbol in coolParsed.SD.S)
+    static function loopTimeline(TL:Timeline, coolParsed:Parsed)
+    {
+        // var numSymbols:Int = 0;
+
+        for (layer in TL.L)
+        {
+            for (frame in layer.FR)
+            {
+                for (element in frame.E)
                 {
+                    if (Reflect.hasField(element, "SI"))
+                    {   
+                        // trace("FRAME" + frame.I);
+                        // trace('Cool symbol instance!');
+                        // trace(element.SI.SN);
 
-                    var symbolName = symbol.SN;
-                    trace(symbolName);
-                    for (layer in symbol.TL.L)
-                    {
-                        for (frame in layer.FR)
-                        {
-                            for (element in frame.E)
+                        var nestedSymbol = symbolMap.get(element.SI.SN);
+                        loopTimeline(nestedSymbol.TL, coolParsed);
+                        // loopTimeline(nestedSymbol.TL, coolParsed);
+
+                        // trace(nestedSymbol.TL);
+                        if (symbolAtlasShit.exists(element.SI.SN))
                             {
-                                if (Reflect.hasField(element, 'ASI'))
-                                {
-                                    awesomeMap.set(symbolName, element.ASI.N);
-                                } 
+                                // trace(symbolAtlasShit.get(element.SI.SN));
                             }
+                            
+                        
+                    }
+                    else
+                    {
+                        // trace('ATLAS SYMBOL INSTANCE!');
+                        // trace(element.ASI.N);
+                    }
+
+                    loopShit++;
+                }
+            }
+        }
+
+        // trace(numSymbols);
+    }
+
+    static function findArray(symbolName:String, coolParse:Parsed):Animation
+    {
+
+        for (symbol in coolParse.SD.S)
+        {
+            if (symbol.SN == symbolName)
+            {
+                // trace("found symbol! " + symbol.SN);
+                return symbol;
+            }   
+        }
+
+        return null;
+    }
+
+    static var symbolMap:Map<String, Animation> = new Map();
+
+    static function parseSymbolDictionary(coolParsed:Parsed):Map<String, String>
+    {   
+        var awesomeMap:Map<String, String> = new Map();
+        for (symbol in coolParsed.SD.S)
+            {
+                
+                symbolMap.set(symbol.SN, symbol);
+
+                var symbolName = symbol.SN;
+                for (layer in symbol.TL.L)
+                {
+                    for (frame in layer.FR)
+                    {
+                        for (element in frame.E)
+                        {
+                            if (Reflect.hasField(element, 'ASI'))
+                            {
+                                awesomeMap.set(symbolName, element.ASI.N);
+                            } 
                         }
                     }
                 }
+            }
 
-            return awesomeMap;
-        }
+        return awesomeMap;
+    }
 
 }
 // Run through the AN file, and get all the symbol names
