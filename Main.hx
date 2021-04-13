@@ -7,7 +7,7 @@ class Main
 
     static public function main():Void
         {
-            var animateFile:String = File.getContent('./animTest/Animation4.json');
+            var animateFile:String = File.getContent('./animTest/TightBars.json');
             var theJSON = Json.parse(animateFile);
 
 
@@ -28,14 +28,22 @@ class Main
                 symbolAtlasShit = parseSymbolDictionary(coolParsed);
 
 
-            loopTimeline(coolParsed.AN.TL, coolParsed);
+            // loopTimeline(coolParsed.AN.TL, coolParsed);
+
+            for (i in 0...24)
+                {
+                    trace('------------');
+                    getFrameIndex(i, coolParsed);
+                }
 
             
-            trace(loopShit);
+
+            
+            // trace(loopShit);
 
 
             // trace(symbolAtlasShit.toString());
-            trace(hasSymbolDictionary);
+            // trace(hasSymbolDictionary);
 
             // for (i in coolParsed)
                 // trace(i);
@@ -44,6 +52,45 @@ class Main
         }
 
     static var loopShit:Int = 0;
+
+    static function getFrameIndex(frameInt:Int = 0, coolParsed:Parsed)
+    {
+        for (layer in coolParsed.AN.TL.L)
+        {
+            trace(layer.LN);
+            
+            // trace()
+
+            var frameLength:Int = 0;
+
+            // trace(layer.FR[frameInt]);
+            for (frame in layer.FR)
+            {
+                if (frameInt >= frame.I && frameInt < frame.I + frame.DU)
+                {
+                    frameLength += frame.DU;
+                    trace(frame.I + " - " + frame.DU);
+                    for (element in frame.E)
+                    {
+                        if (Reflect.hasField(element, 'SI'))
+                        {
+                            trace(element.SI.SN);
+                        }
+                        else
+                            trace(element.ASI.N);
+                    }
+
+                }
+
+            }
+                
+
+            trace('frame length: ' + frameLength);
+        }
+    }
+
+    //IN FLIXEL YOU DONT NEED TO LOOP THROUGH EVERYTHING!!!
+    // YOU CAN USE CURRENT FRAME DATA AND SHIT
 
     static function loopTimeline(TL:Timeline, coolParsed:Parsed)
     {
